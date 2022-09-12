@@ -1,9 +1,9 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 
 function App() {
+  const addRef = useRef();
 
 
-  
   const [jobsList, setJobsList] = useState(() => {
     const storageJobsList = JSON.parse(localStorage.getItem('jobsList'));
     return storageJobsList ?? []
@@ -14,31 +14,42 @@ function App() {
   const handleAdd = () => {
     setJobsList(prev => {
       const newJobsList = [...prev, job];
-      const jsonJobsList = JSON.stringify(newJobsList);
-      localStorage.setItem('jobsList',jsonJobsList)
       return newJobsList;
     });
     setJob('')
+    addRef.current.focus();
   }
 
   const handleDelete = (index) => {
     setJobsList(prev => {
-      prev.splice(index,1);
-      //console.log(prev);
-      localStorage.setItem('jobsList',JSON.stringify(prev));
-      return prev
+      const arr = [...prev];
+      arr.splice(index, 1);
+      return arr
     })
   }
+  const handleEdit = (index) => {
+
+  }
+
+  //update local storage
+  useEffect(() => {
+    const jsonJobsList = JSON.stringify(jobsList);
+    localStorage.setItem('jobsList', jsonJobsList)
+  }, [jobsList])
+
 
   return (
     <div className="App">
       <ul>
-        {jobsList.map((job, index) => <li key={index}>
-          {job}
-           <button onClick={() => {handleDelete(index)}}>Delete</button>
-        </li>)}
+        {jobsList.map((job, index) =>
+          <li key={index}>
+            {job}
+            <button onClick={() => { handleEdit(index) }}>Edit</button>
+            <button onClick={() => { handleDelete(index) }}>Delete</button>
+          </li>)}
       </ul>
-      <input value={job} onChange={e => { setJob(e.target.value) }} />
+      <input ref={addRef} value={job} placeholder="add todo job" onChange=
+        {e => { setJob(e.target.value) }} />
       <button onClick={handleAdd}>Add New Job</button>
 
     </div>
